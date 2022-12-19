@@ -80,7 +80,7 @@ public class TagStyledView: UIView {
     public var didSelectItemAt: ((IndexPath) -> Void)?
     
     private let layout = TagStyleFlowLayout()
-    private var collectionView: WrappingCollectionView!
+    private var collectionView: UICollectionView!
     
     private var reseource: (cell: TagStyling, identifier: String)?
     
@@ -96,7 +96,7 @@ public class TagStyledView: UIView {
     }
     
     private func setup() {
-        collectionView = WrappingCollectionView(frame: bounds, collectionViewLayout: layout)
+        collectionView = ContentsWrappingCollectionView(frame: bounds, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear
         collectionView.delegate = self
@@ -145,14 +145,15 @@ extension TagStyledView: UICollectionViewDelegateFlowLayout {
     }
 }
 
-extension TagStyledView: UICollectionViewDelegate {
-    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.deselectItem(at: indexPath, animated: true)
-        didSelectItemAt?(indexPath)
+extension TagStyledView {
+    public func reloadCell(indexPath: IndexPath){
+        UIView.performWithoutAnimation {
+            collectionView.reloadItems(at: [indexPath])
+        }
     }
 }
 
-final class WrappingCollectionView: UICollectionView {
+final class ContentsWrappingCollectionView: UICollectionView {
     override func reloadData() {
         super.reloadData()
         
@@ -168,5 +169,12 @@ final class WrappingCollectionView: UICollectionView {
         super.layoutSubviews()
         invalidateIntrinsicContentSize()
         superview?.layoutIfNeeded()
+    }
+}
+
+extension TagStyledView: UICollectionViewDelegate {
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        didSelectItemAt?(indexPath)
     }
 }
